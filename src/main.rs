@@ -60,7 +60,7 @@ fn main() -> Result<()> {
         vec![process_single_file(&doc_files[0], None)?]
     } else {
         // Multiple files or output to directory - use parallel processing
-        process_multiple_files(doc_files, args.output.as_deref())
+        process_multiple_files(doc_files, args.output.as_deref())?
     };
 
     // Report results

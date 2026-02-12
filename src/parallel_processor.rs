@@ -56,14 +56,15 @@ pub fn process_single_file(input: &Path, output_dir: Option<&Path>) -> Result<Co
 pub fn process_multiple_files(
     inputs: Vec<PathBuf>,
     output_dir: Option<&Path>,
-) -> Vec<ConversionResult> {
+) -> Result<Vec<ConversionResult>> {
     // If output directory is specified, create it
     if let Some(dir) = output_dir {
-        fs::create_dir_all(dir).ok();
+        fs::create_dir_all(dir)
+            .with_context(|| format!("Failed to create output directory: {}", dir.display()))?;
     }
 
     // Use rayon for parallel processing
-    inputs
+    Ok(inputs
         .par_iter()
         .map(|input| {
             process_single_file(input, output_dir).unwrap_or_else(|e| ConversionResult {
@@ -73,7 +74,7 @@ pub fn process_multiple_files(
                 error: Some(e.to_string()),
             })
         })
-        .collect()
+        .collect())
 }
 
 /// Find all .doc files in a directory (recursively)

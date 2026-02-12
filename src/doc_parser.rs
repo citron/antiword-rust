@@ -36,9 +36,15 @@ fn extract_text_from_binary(data: &[u8]) -> String {
     let mut text = String::new();
     let mut i = 0;
 
-    // Skip the FIB (File Information Block) - first 1536 bytes typically
-    if data.len() > 1536 {
-        i = 1536;
+    // Skip the FIB (File Information Block)
+    // According to the .doc file format specification, the FIB is a 1472-byte structure
+    // at the beginning of the WordDocument stream. However, we skip 1536 bytes (1.5KB)
+    // to account for the FIB plus additional header structures and padding that precede
+    // the actual document text content. This conservative approach helps ensure we don't
+    // capture binary metadata as text.
+    const FIB_SKIP_SIZE: usize = 1536;
+    if data.len() > FIB_SKIP_SIZE {
+        i = FIB_SKIP_SIZE;
     }
 
     // Simple text extraction - look for printable characters
